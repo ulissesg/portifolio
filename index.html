@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Localização, Hora, Temperatura</title>
+</head>
+<body>
+  <h1>Informações sobre a cidade selecionada</h1>
+  <label for="city-select">Escolha uma cidade:</label>
+  <select id="city-select">
+    <option value="London">Londres</option>
+    <option value="Tokyo">Tóquio</option>
+    <option value="New York">Nova Iorque</option>
+    <option value="São Paulo">São Paulo</option>
+    <option value="Sydney">Sydney</option>
+  </select>
+
+  <p id="location">Localização: Selecionar uma cidade.</p>
+  <p id="weather">Temperatura: Obtendo...</p>
+  <p id="date-time">Data e Hora: Obtendo...</p>
+
+  <script>
+    // Função para pegar a temperatura da cidade selecionada
+    function getWeather(city) {
+      const apiKey = '06e063dd67a8f741aefaa6e6b4656ff5';
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+      fetch(weatherUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Erro ao buscar dados do tempo');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const temp = data.main.temp;
+          document.getElementById("weather").innerHTML = `Temperatura: ${temp}°C`;
+          document.getElementById("location").innerHTML = `Localização: ${data.name}, ${data.sys.country}`;
+          showDateTime(data.timezone);
+        })
+        .catch(error => {
+          console.log('Erro ao buscar temperatura:', error);
+          document.getElementById("weather").innerHTML = "Não foi possível obter a temperatura.";
+        });
+    }
+
+    // Função para exibir data e hora com base no fuso horário
+    function showDateTime(timezone) {
+      const now = new Date(new Date().getTime() + timezone * 1000);
+      const dateTime = now.toLocaleString();
+      document.getElementById("date-time").innerHTML = `Data e Hora: ${dateTime}`;
+    }
+
+    // Executa ao carregar a página
+    window.onload = function () {
+      const citySelect = document.getElementById("city-select");
+      citySelect.onchange = function () {
+        const selectedCity = citySelect.value;
+        getWeather(selectedCity);
+      };
+
+      // Chama a função pela primeira vez para a cidade padrão
+      getWeather(citySelect.value);
+    };
+  </script>
+</body>
+</html>
